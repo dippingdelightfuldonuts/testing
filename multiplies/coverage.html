@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">testing/multiplies/mutliplies.go (81.8%)</option>
+				
+				<option value="file1">testing/multiplies/strategies.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package multiplies
+
+import "fmt"
+
+func Multiply(x, y int, s string) int <span class="cov8" title="1">{
+        var sgy strategy
+
+        switch s </span>{
+        case "egyptian":<span class="cov8" title="1">
+                sgy = &amp;egyptian{}</span>
+        case "normal":<span class="cov8" title="1">
+                sgy = &amp;normal{}</span>
+        case "russian":<span class="cov8" title="1">
+                sgy = &amp;russianPeasant{}</span>
+        case "long":<span class="cov8" title="1">
+                sgy = &amp;long{}</span>
+        case "addition":<span class="cov8" title="1">
+                sgy = &amp;addition{}</span>
+        case "lattice":<span class="cov8" title="1">
+                sgy = &amp;lattice{}</span>
+        default:<span class="cov0" title="0">
+                str, _ := fmt.Printf("not implemented: %s", s)
+                panic(str)</span>
+        }
+
+        <span class="cov8" title="1">return sgy.Multiply(x, y)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package multiplies
+
+import (
+        "fmt"
+        "math"
+        "strconv"
+)
+
+type strategy interface {
+        Multiply(int, int) int
+}
+
+type egyptian struct {
+}
+
+func (this *egyptian) Multiply(x, y int) int <span class="cov8" title="1">{
+        keys := make([]int, 0)
+        lookup := make(map[int]int)
+        currentValue := y
+
+        for binary := 1; binary &lt;= x; binary *= 2 </span><span class="cov8" title="1">{
+                lookup[binary] = currentValue
+                keys = append(keys, binary)
+
+                currentValue = currentValue * 2 // double y each iteration
+        }</span>
+
+        <span class="cov8" title="1">reversedKeys := reverse(keys)
+        remainer := x
+
+        solution := 0
+
+        for _, key := range reversedKeys </span><span class="cov8" title="1">{
+                value, _ := lookup[key]
+
+                if key &lt;= remainer </span><span class="cov8" title="1">{
+                        remainer -= key
+                        solution += value
+                }</span>
+        }
+
+        <span class="cov8" title="1">return solution</span>
+}
+
+func reverse(a []int) []int <span class="cov8" title="1">{
+        for left, right := 0, len(a)-1; left &lt; right; left, right = left+1, right-1 </span><span class="cov8" title="1">{
+                a[left], a[right] = a[right], a[left]
+        }</span>
+
+        <span class="cov8" title="1">return a</span>
+}
+
+type normal struct {
+}
+
+func (this *normal) Multiply(x, y int) int <span class="cov8" title="1">{
+        return x * y
+}</span>
+
+type russianPeasant struct {
+}
+
+func (this *russianPeasant) Multiply(x, y int) int <span class="cov8" title="1">{
+        binary := y
+        result := 0
+
+        for left := x; left &gt; 0; left /= 2 </span><span class="cov8" title="1">{
+                if left%2 == 1 </span><span class="cov8" title="1">{
+                        result += binary
+                }</span>
+
+                <span class="cov8" title="1">binary *= 2</span>
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+type long struct {
+}
+
+func (this *long) Multiply(x, y int) int <span class="cov8" title="1">{
+        xStr := reverseStr(strconv.Itoa(x))
+        yStr := reverseStr(strconv.Itoa(y))
+        result := 0
+        carry := 0
+
+        for yMagnitude, yChar := range yStr </span><span class="cov8" title="1">{
+                yc := string(yChar)
+                yValue, _ := strconv.Atoi(yc)
+                magnitude := 0
+
+                for xMagnitude, xChar := range xStr </span><span class="cov8" title="1">{
+                        xc := string(xChar)
+                        xValue, _ := strconv.Atoi(xc)
+
+                        magnitude = int(math.Pow(10, float64(xMagnitude))) * int(math.Pow(10, float64(yMagnitude)))
+
+                        subMultiply := xValue * yValue
+                        result += (subMultiply%10 + carry) * magnitude
+                        carry = subMultiply / 10
+                }</span>
+
+                <span class="cov8" title="1">if carry &gt; 0 </span><span class="cov8" title="1">{
+                        result += carry * magnitude * 10
+                        carry = 0
+                }</span>
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+func reverseStr(s string) string <span class="cov8" title="1">{
+        runes := []rune(s)
+        for i, j := 0, len(runes)-1; i &lt; j; i, j = i+1, j-1 </span><span class="cov8" title="1">{
+                runes[i], runes[j] = runes[j], runes[i]
+        }</span>
+        <span class="cov8" title="1">return string(runes)</span>
+}
+
+type addition struct {
+}
+
+func (this *addition) Multiply(x, y int) int <span class="cov8" title="1">{
+        result := 0
+
+        for i := 0; i &lt; y; i++ </span><span class="cov8" title="1">{
+                result += x
+        }</span>
+
+        <span class="cov8" title="1">return result</span>
+}
+
+type lattice struct {
+}
+
+type cell struct {
+        label int
+        upper int
+        lower int
+}
+
+func (this cell) String() string <span class="cov8" title="1">{
+        if this.label != 0 </span><span class="cov8" title="1">{
+                return strconv.Itoa(this.label)
+        }</span>
+
+        <span class="cov8" title="1">return fmt.Sprintf("%d/%d", this.upper, this.lower)</span>
+}
+
+func (this *lattice) Multiply(x, y int) int <span class="cov8" title="1">{
+        xStr := strconv.Itoa(x)
+        yStr := strconv.Itoa(y)
+
+        xSize := len(xStr) + 1
+        ySize := len(yStr) + 1
+
+        matrix := make([][]cell, xSize)
+        rows := make([]cell, xSize*ySize)
+        for j := 0; j &lt; ySize; j++ </span><span class="cov8" title="1">{
+                matrix[j] = rows[j*xSize : (j+1)*xSize]
+        }</span>
+
+        <span class="cov8" title="1">for i, xChar := range xStr </span><span class="cov8" title="1">{
+                value, _ := strconv.Atoi(string(xChar))
+                matrix[0][i] = cell{
+                        label: value,
+                }
+        }</span>
+
+        <span class="cov8" title="1">for j, yChar := range yStr </span><span class="cov8" title="1">{
+                value, _ := strconv.Atoi(string(yChar))
+                matrix[1+j][xSize-1] = cell{
+                        label: value,
+                }
+        }</span>
+
+        // fill in cells
+        <span class="cov8" title="1">for j := 1; j &lt; ySize; j++ </span><span class="cov8" title="1">{
+                for i := 0; i &lt; xSize-1; i++ </span><span class="cov8" title="1">{
+                        grabX := matrix[0][i]
+                        grabY := matrix[j][xSize-1]
+
+                        mult := grabX.label * grabY.label
+                        matrix[j][i] = cell{
+                                upper: mult / 10,
+                                lower: mult % 10,
+                        }
+                }</span>
+        }
+
+        <span class="cov8" title="1">fmt.Println("matrix: ", matrix)
+        return 0</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
